@@ -1,0 +1,16 @@
+{
+  "name": "btree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "btree.js",
+  "scripts": {
+    "test": "mocha|| true"
+  },
+  "author": "Betsy Stevens",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.2.0"
+  },
+  "dependencies": {}
+}
