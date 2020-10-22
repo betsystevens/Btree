@@ -96,15 +96,9 @@ function split(tree, node) {
   } else {
     let index = left.parent.keys.findIndex((e) => e > midKey);
     let pos = (index === -1) ? left.parent.keyCount() : index;
-    if (index === -1) {
-      left.parent.keys.splice(pos, 0, midKey);
-      left.parent.child[pos] = left;
-      left.parent.child[pos+1] = right;
-    } else {
-      left.parent.keys.splice(pos, 0, midKey);
-      left.parent.child[pos] = left;
-      left.parent.child.splice(pos+1, 0, right);
-    }
+    left.parent.keys.splice(pos, 0, midKey);
+    left.parent.child[pos] = left;
+    left.parent.child.splice(pos+1, 0, right);
   }
 }
 function splitRight(node) {
