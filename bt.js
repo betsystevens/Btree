@@ -1,5 +1,16 @@
 'use strict';
 
+/*  
+ *  JavaScript Implementation of a B tree
+ *  m - order of tree ≈ max number of children
+ *  
+ * nodes are split with left-bias, 
+ *  when nodes don't split evenly in two (after removing middle node)
+ *  the left side will have one more key than the right side
+ *
+ * */
+
+
 function btree(m) {
   return {
     root: null,
@@ -34,7 +45,7 @@ function makeNode() {
     parent: null, 
     keys: [],    // max: m-1
     child: [],   // max: m
-    keyCount : function() { return this.keys.length; } ,
+    keyCount: function() { return this.keys.length; } ,
     contains: function(item) { return (this.keys.includes(item))},
     // returns index of child[] ≈≈ the subTree to search for item
     subTree: function(item){
@@ -48,7 +59,6 @@ function makeNode() {
     insert: function (item) {
       this.keys.push(item); 
       this.keys.sort((a,b) => ((a<b) ? -1 : ((a>b) ? 1: 0)));
-      // console.log(`node keys: ${this.keys}`)
     }
   } 
 }
@@ -65,6 +75,7 @@ function insert(tree, item){
     if (!node.contains(item)) {
       node.insert(item);
       // make into recursive function
+
       if (node.keyCount() > tree.maxKeys) {
         split(tree, node)
       } 
@@ -80,17 +91,26 @@ function split(tree, node) {
   let midKey = left.keys.pop();
 
   // was root just split? get new root node 
-  newRootNode(tree, left, right, midKey);
   if (left.parent === null) { 
     newRootNode(tree, left, right, midKey);
   } else {
-    // push middle key to parent
+    console.log(`pushing ${midKey} to parent`);
+    console.log(`parent is: ${left.parent}`);
+    if (midKey > left.parent.keys[left.parent.keys.length-1]) {
+    // push middle key to end of parent
+      left.parent.keys.push(midKey);
+      left.parent.child[left.parent.child.length-1] = left;
+      left.parent.child.push(right);
+    } else {
+      console.log('key goes in middle or beginning');
+    }
   }
 }
 function splitRight(node) {
   let middle = Math.floor(node.keys.length/2);
   // move right half into new node
   let newNode = makeNode();
+  newNode.isLeaf = true;
   newNode.keys = node.keys.slice(middle+1);
   if (!node.isLeaf) console.log('deal with links!');
   return newNode;
@@ -117,11 +137,14 @@ function newRootNode(tree, left, right, key) {
 function traverse(tree) {
   
 }
-const testTree = btree(3);
-insert(testTree, 4);
-insert(testTree, 2);
-insert(testTree, 7);
-insert(testTree, 1);
+const tree = btree(3);
+
+insert(tree, 7);
+insert(tree, 4);
+insert(tree, 2);
+insert(tree, 1);
+insert(tree, 8);
+insert(tree, 9);
 /*
 insert(testTree, 4);
 */

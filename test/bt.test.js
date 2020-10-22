@@ -44,7 +44,7 @@ describe('B tree tests - bt.js', function() {
       // expect(() => node.compare(null)).to.throw('calls compare with null');
     });
   });
-  describe('test 3 inserts with splitting', function() {
+  describe('test 3 inserts -> splitting root', function() {
     let tree = {};
     before(function(){
       const order = 3;
@@ -69,7 +69,7 @@ describe('B tree tests - bt.js', function() {
       assert.equal(tree.root.child[1].keys[0], 7, 'right leaf');
     });
   });
-  describe('test 4 inserts with splitting', function() {
+  describe('test 4 inserts -> splitting root', function() {
     let tree = {};
     before(function(){
       const order = 3;
@@ -94,7 +94,7 @@ describe('B tree tests - bt.js', function() {
       assert.equal(tree.root.child[1].keyCount(), 1, 'right leaf key count');
     });
    });
-  describe('test 5 inserts with splitting', function() {
+  describe('test 5 inserts -> splitting root', function() {
     let tree = {};
     before(function(){
       const order = 3;
@@ -118,4 +118,39 @@ describe('B tree tests - bt.js', function() {
       assert.equal(tree.root.child[1].keys[1], 8, 'right leaf key 2');
     });
    });
+  describe('unit tests', function () {
+    let tree = {};
+    before(function(){
+
+    })
+    it('test blah blah', function() {
+      // asserts and equals and stuff...
+    })
+  })
+  describe('test 6 inserts -> splitting a leaf - not root', function() {
+    let tree = {};
+    before(function(){
+      const order = 3;
+      tree = btree(order);
+      insert(tree, 7);
+      insert(tree, 4);
+      insert(tree, 2);
+      insert(tree, 1);
+      insert(tree, 8);
+      insert(tree, 9);
+    })
+    it('tests root contents and child contents', function(){
+      assert.equal(tree.root.keyCount(), 2, 'count keys in root');
+      assert.equal(tree.root.isLeaf, false, 'root is not a leaf');
+      assert.equal(tree.root.keys[0], 4, 'root key at 0');
+      assert.equal(tree.root.keys[1], 8, 'root key at 1');
+      assert.equal(tree.root.child[0].isLeaf, true, 'child0 of root is a leaf');
+      assert.equal(tree.root.child[1].isLeaf, true, 'child1 of root is a leaf');
+      assert.equal(tree.root.child[2].isLeaf, true, 'child2 of root is a leaf');
+      assert.equal(tree.root.child[0].keys[0], 1, 'left child key0');
+      assert.equal(tree.root.child[0].keys[1], 2, 'left child key1');
+      assert.equal(tree.root.child[1].keys[0], 7, 'middle child key0');
+      assert.equal(tree.root.child[2].keys[0], 9, 'right child key0');
+    });
+  });
 });
