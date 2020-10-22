@@ -94,15 +94,16 @@ function split(tree, node) {
   if (left.parent === null) { 
     newRootNode(tree, left, right, midKey);
   } else {
-    console.log(`pushing ${midKey} to parent`);
-    console.log(`parent is: ${left.parent}`);
-    if (midKey > left.parent.keys[left.parent.keys.length-1]) {
-    // push middle key to end of parent
-      left.parent.keys.push(midKey);
-      left.parent.child[left.parent.child.length-1] = left;
-      left.parent.child.push(right);
+    let index = left.parent.keys.findIndex((e) => e > midKey);
+    let pos = (index === -1) ? left.parent.keyCount() : index;
+    if (index === -1) {
+      left.parent.keys.splice(pos, 0, midKey);
+      left.parent.child[pos] = left;
+      left.parent.child[pos+1] = right;
     } else {
-      console.log('key goes in middle or beginning');
+      left.parent.keys.splice(pos, 0, midKey);
+      left.parent.child[pos] = left;
+      left.parent.child.splice(pos+1, 0, right);
     }
   }
 }
@@ -137,16 +138,14 @@ function newRootNode(tree, left, right, key) {
 function traverse(tree) {
   
 }
+/*
 const tree = btree(3);
-
 insert(tree, 7);
 insert(tree, 4);
 insert(tree, 2);
 insert(tree, 1);
 insert(tree, 8);
 insert(tree, 9);
-/*
-insert(testTree, 4);
 */
 module.exports.btree = btree;
 module.exports.insert = insert;
