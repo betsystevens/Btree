@@ -64,24 +64,24 @@ function makeNode() {
 }
 
 function insert(tree, item){
-  // console.log(`insert: ${item}`);
   if(tree.root === null) {
     tree.root = makeNode();
     tree.root.keys.push(item);
   } else {
     // get leaf to insert item into, unless already in tree
-    // console.log(tree.root);
     let node = tree.find(item, tree.root);  
     if (!node.contains(item)) {
       node.insert(item);
-      // make into recursive function
-
-      if (node.keyCount() > tree.maxKeys) {
-        split(tree, node)
-      } 
+      balance(tree, node);
     }
   }
 };
+
+function balance(tree, node) {
+  if (node.keyCount() > tree.maxKeys) {
+    balance(tree, split(tree, node));
+  } 
+}
 
 function split(tree, node) {
   // leaf node is split ≈≈ left and right
@@ -90,34 +90,47 @@ function split(tree, node) {
   // will push midKey to parent
   let midKey = left.keys.pop();
 
-  // was root just split? get new root node 
-  if (left.parent === null) { 
-    newRootNode(tree, left, right, midKey);
+  let parent = left.parent;
+  // did we split the root? make new root node 
+  if (parent === null) { 
+    increaseTreeDepth(tree, left, right, midKey);
+    parent = tree.root;
   } else {
-    let index = left.parent.keys.findIndex((e) => e > midKey);
-    let pos = (index === -1) ? left.parent.keyCount() : index;
-    left.parent.keys.splice(pos, 0, midKey);
-    left.parent.child[pos] = left;
-    left.parent.child.splice(pos+1, 0, right);
+    let index = parent.keys.findIndex((e) => e > midKey);
+    let pos = (index === -1) ? parent.keyCount() : index;
+    parent.keys.splice(pos, 0, midKey);
+    parent.child[pos] = left;
+    parent.child.splice(pos+1, 0, right);
+    right.parent = left.parent;
   }
+  return parent;
 }
 function splitRight(node) {
   let middle = Math.floor(node.keys.length/2);
   // move right half into new node
   let newNode = makeNode();
-  newNode.isLeaf = true;
   newNode.keys = node.keys.slice(middle+1);
-  if (!node.isLeaf) console.log('deal with links!');
+  if (!node.isLeaf) {
+    // deal with links
+    newNode.isLeaf = false;
+    newNode.child[0] = node.child[middle+1];
+    newNode.child[0].parent = newNode; 
+    newNode.child[1] = node.child[middle+2];
+    newNode.child[1].parent = newNode; 
+  }
   return newNode;
 }
 function splitLeft(node) {
   let middle = Math.floor(node.keys.length/2);
   node.keys.splice(middle+1);
-  if (!node.isLeaf) console.log('deal with links!');
+  if (!node.isLeaf){
+    // deal with links
+    node.child.splice(middle+1);
+  } 
   return node;
 }
 
-function newRootNode(tree, left, right, key) {
+function increaseTreeDepth(tree, left, right, key) {
   let newRoot = makeNode();
   newRoot.parent === null;
   tree.root = newRoot;
@@ -132,14 +145,17 @@ function newRootNode(tree, left, right, key) {
 function traverse(tree) {
   
 }
-/*
-const tree = btree(3);
-insert(tree, 7);
-insert(tree, 4);
-insert(tree, 2);
-insert(tree, 1);
-insert(tree, 8);
-insert(tree, 9);
-*/
+
+const atree = btree(3);
+insert(atree, 1);
+insert(atree, 2);
+insert(atree, 3);
+insert(atree, 4);
+insert(atree, 5);
+insert(atree, 6);
+insert(atree, 7);
+insert(atree, 8);
+insert(atree, 9);
+
 module.exports.btree = btree;
 module.exports.insert = insert;

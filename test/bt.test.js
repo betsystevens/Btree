@@ -86,8 +86,7 @@ describe('B tree tests - bt.js', function() {
     });
     it('tests root children contents', function(){
       assert.equal(tree.root.child[0].isLeaf, true, 'child of root is a leaf');
-      assert.equal(tree.root.child[0].keys[0], 1, 'left leaf key 1');
-      assert.equal(tree.root.child[0].keys[1], 2, 'left leaf key 2');
+      expect(tree.root.child[0].keys).to.eql([ 1, 2 ], 'L child keys');
       assert.equal(tree.root.child[0].keyCount(), 2, 'left leaf key count');
       assert.equal(tree.root.child[1].isLeaf, true, 'other child of root is a leaf');
       assert.equal(tree.root.child[1].keys[0], 7, 'right leaf key');
@@ -109,13 +108,11 @@ describe('B tree tests - bt.js', function() {
     it('tests root contents and child contents', function(){
       assert.equal(tree.root.keyCount(), 1, 'count keys in root');
       assert.equal(tree.root.isLeaf, false, 'root is not a leaf');
-      assert.equal(tree.root.keys[0], 4, 'new root key');
+      expect(tree.root.keys).to.eql([ 4 ], 'root keys');
       assert.equal(tree.root.child[0].isLeaf, true, 'child of root is a leaf');
-      assert.equal(tree.root.child[0].keys[0], 1, 'left leaf key 1');
-      assert.equal(tree.root.child[0].keys[1], 2, 'left leaf key 2');
+      expect(tree.root.child[0].keys).to.eql([ 1, 2 ], 'L child keys');
       assert.equal(tree.root.child[1].isLeaf, true, 'other child of root is a leaf');
-      assert.equal(tree.root.child[1].keys[0], 7, 'right leaf key 1');
-      assert.equal(tree.root.child[1].keys[1], 8, 'right leaf key 2');
+      expect(tree.root.child[1].keys).to.eql([ 7, 8 ], 'R child keys');
     });
    });
   describe('unit tests', function () {
@@ -142,15 +139,13 @@ describe('B tree tests - bt.js', function() {
     it('tests root contents and child contents', function(){
       assert.equal(tree.root.keyCount(), 2, 'count keys in root');
       assert.equal(tree.root.isLeaf, false, 'root is not a leaf');
-      assert.equal(tree.root.keys[0], 4, 'root key at 0');
-      assert.equal(tree.root.keys[1], 8, 'root key at 1');
+      expect(tree.root.keys).to.eql([ 4, 8 ], 'root keys');
       assert.equal(tree.root.child[0].isLeaf, true, 'child0 of root is a leaf');
       assert.equal(tree.root.child[1].isLeaf, true, 'child1 of root is a leaf');
       assert.equal(tree.root.child[2].isLeaf, true, 'child2 of root is a leaf');
-      assert.equal(tree.root.child[0].keys[0], 1, 'left child key0');
-      assert.equal(tree.root.child[0].keys[1], 2, 'left child key1');
-      assert.equal(tree.root.child[1].keys[0], 7, 'middle child key0');
-      assert.equal(tree.root.child[2].keys[0], 9, 'right child key0');
+      expect(tree.root.child[0].keys).to.eql([ 1, 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 7 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 9 ], 'R child keys');
     });
     it('tests middle leaf insert', function(){
       insert(tree, 5);
@@ -176,11 +171,159 @@ describe('B tree tests - bt.js', function() {
     it('tests left leaf split, push', function(){
       assert.equal(tree.root.keyCount(), 2, 'count keys in root');
       assert.equal(tree.root.isLeaf, false, 'root is not a leaf');
-      assert.equal(tree.root.keys[0], 2, 'root key at 0');
-      assert.equal(tree.root.keys[1], 4, 'root key at 1');
-      assert.equal(tree.root.child[0].keys[0], 1, 'left child key0');
-      assert.equal(tree.root.child[1].keys[0], 3, 'middle child key0');
-      assert.equal(tree.root.child[2].keys[0], 7, 'right child key0');
+      expect(tree.root.keys).to.eql([ 2, 4 ], 'root keys');
+      expect(tree.root.child[0].keys).to.eql([ 1 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 3 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 7 ], 'R child keys');
+    });
+  });
+  describe('test order 4 tree', function() {
+    let tree = {};
+    before(function(){
+      const order = 4;
+      tree = btree(order);
+      insert(tree, 5);
+      insert(tree, 3);
+      insert(tree, 21);
+      insert(tree, 9);
+      insert(tree, 1);
+      insert(tree, 13);
+    });
+    it('tests root split', function(){
+      assert.equal(tree.root.keyCount(), 1, 'count keys in root');
+      assert.equal(tree.root.isLeaf, false, 'root is not a leaf');
+      expect(tree.root.keys).to.eql([ 9 ], 'root keys');
+      expect(tree.root.child[0].keys).to.eql([ 1, 3, 5 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 13, 21 ], 'R child keys');
+    });
+    it('tests leaf split', function(){
+      insert(tree, 2);
+      assert.equal(tree.root.keyCount(), 2, 'count keys in root');
+      expect(tree.root.keys).to.eql([ 3, 9 ], 'root keys');
+      expect(tree.root.child[0].keys).to.eql([ 1, 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 5 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 13, 21 ], 'R child keys');
+    });
+    it('tests leaf split', function(){
+      insert(tree, 10);
+      insert(tree, 11);
+      assert.equal(tree.root.keyCount(), 3, 'count keys in root');
+      expect(tree.root.keys).to.eql([ 3, 9, 13 ], 'root keys');
+      expect(tree.root.child[2].keys).to.eql([ 10, 11 ], 'M child keys');
+      expect(tree.root.child[3].keys).to.eql([ 21 ], 'R child keys');
+    });
+  });
+  describe('test order:3 depth:4 items:', function() {
+    let tree = {};
+    before(function(){
+      const order = 3;
+      tree = btree(order);
+      insert(tree, 1);
+      insert(tree, 2);
+      insert(tree, 3);
+      insert(tree, 4);
+      insert(tree, 5);
+      insert(tree, 6);
+    });
+    it('insert 6 items', function(){
+      expect(tree.root.keys).to.eql([ 2, 4 ], 'root keys');
+      expect(tree.root.child[0].keys).to.eql([ 1 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 3 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 5, 6 ], 'R child keys');
+    });
+    it('insert 2 more, total 8 items', function(){
+      insert(tree, 7);
+      insert(tree, 8);
+      expect(tree.root.keys).to.eql([ 4 ], 'root keys');
+      expect(tree.root.child[0].keys).to.eql([ 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 6 ], 'R child keys');
+      expect(tree.root.child[0].child[0].keys).to.eql([ 1 ], 'leaf 1 keys');
+      expect(tree.root.child[0].child[1].keys).to.eql([ 3 ], 'leaf 2 keys');
+      expect(tree.root.child[1].child[0].keys).to.eql([ 5 ], 'leaf 3 keys');
+      expect(tree.root.child[1].child[1].keys).to.eql([ 7, 8 ], 'leaf 4 keys');
+      /*
+      console.log(tree.root.child[0].keys);
+      console.log("  ", tree.root.child[0].child[0].keys,
+                  tree.root.child[0].child[1].keys);
+      console.log(tree.root.child[1].keys);
+      console.log("  ", tree.root.child[1].child[0].keys,
+                  tree.root.child[1].child[1].keys);
+      */
+    });
+    it('insert 2 more, total 10 items', function(){
+      insert(tree, 9);
+      insert(tree, 10);
+      expect(tree.root.keys).to.eql([ 4 ], 'root keys');
+      /*
+      console.log(tree.root.keys);
+      console.log(tree.root.child[0].keys);
+      console.log("  ", tree.root.child[0].child[0].keys,
+                  tree.root.child[0].child[1].keys);
+      console.log(tree.root.child[1].keys);
+      console.log("  ", tree.root.child[1].child[0].keys,
+                  tree.root.child[1].child[1].keys,
+                  tree.root.child[1].child[2].keys);
+                  */
+      expect(tree.root.child[0].keys).to.eql([ 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 6, 8 ], 'R child keys');
+      expect(tree.root.child[0].child[0].keys).to.eql([ 1 ], 'leaf 1 keys');
+      expect(tree.root.child[0].child[1].keys).to.eql([ 3 ], 'leaf 2 keys');
+      expect(tree.root.child[1].child[0].keys).to.eql([ 5 ], 'leaf 3 keys');
+      expect(tree.root.child[1].child[1].keys).to.eql([ 7 ], 'leaf 4 keys');
+      expect(tree.root.child[1].child[2].keys).to.eql([ 9, 10 ], 'leaf 5 keys');
+    });
+    it('insert 2 more, total 13 items', function(){
+      insert(tree, 11);
+      insert(tree, 12);
+      expect(tree.root.keys).to.eql([ 4, 8 ], 'root keys');
+      /*
+      console.log(tree.root.keys);
+      console.log(tree.root.child[0].keys);
+      console.log("  ", tree.root.child[0].child[0].keys,
+                  tree.root.child[0].child[1].keys);
+      console.log(tree.root.child[1].keys);
+      console.log("  ", tree.root.child[1].child[0].keys,
+                  tree.root.child[1].child[1].keys,
+                  tree.root.child[1].child[2].keys);
+                  */
+      expect(tree.root.child[0].keys).to.eql([ 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 6 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 10 ], 'R child keys');
+      expect(tree.root.child[0].child[0].keys).to.eql([ 1 ], 'leaf 1 keys');
+      expect(tree.root.child[0].child[1].keys).to.eql([ 3 ], 'leaf 2 keys');
+      expect(tree.root.child[1].child[0].keys).to.eql([ 5 ], 'leaf 3 keys');
+      expect(tree.root.child[1].child[1].keys).to.eql([ 7 ], 'leaf 4 keys');
+      expect(tree.root.child[2].child[0].keys).to.eql([ 9 ], 'leaf 5 keys');
+      expect(tree.root.child[2].child[1].keys).to.eql([ 11, 12], 'leaf 6 keys');
+      /*
+      */
+    });
+    it('insert 1 more, total 13 items', function(){
+      insert(tree, 13);
+      insert(tree, 14);
+      expect(tree.root.keys).to.eql([ 4, 8 ], 'root keys');
+      /*
+      console.log(tree.root.keys);
+      console.log(tree.root.child[0].keys);
+      console.log("  ", tree.root.child[0].child[0].keys,
+                  tree.root.child[0].child[1].keys);
+      console.log(tree.root.child[1].keys);
+      console.log("  ", tree.root.child[1].child[0].keys,
+                  tree.root.child[1].child[1].keys,
+                  tree.root.child[1].child[2].keys);
+                  */
+      expect(tree.root.child[0].keys).to.eql([ 2 ], 'L child keys');
+      expect(tree.root.child[1].keys).to.eql([ 6 ], 'M child keys');
+      expect(tree.root.child[2].keys).to.eql([ 10, 12 ], 'R child keys');
+      expect(tree.root.child[0].child[0].keys).to.eql([ 1 ], 'leaf 1 keys');
+      expect(tree.root.child[0].child[1].keys).to.eql([ 3 ], 'leaf 2 keys');
+      expect(tree.root.child[1].child[0].keys).to.eql([ 5 ], 'leaf 3 keys');
+      expect(tree.root.child[1].child[1].keys).to.eql([ 7 ], 'leaf 4 keys');
+      expect(tree.root.child[2].child[0].keys).to.eql([ 9 ], 'leaf 5 keys');
+      expect(tree.root.child[2].child[1].keys).to.eql([ 11], 'leaf 6 keys');
+      expect(tree.root.child[2].child[2].keys).to.eql([ 13, 14], 'leaf 7 keys');
+      /*
+      */
     });
   });
 });
