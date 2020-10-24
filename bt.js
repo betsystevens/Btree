@@ -56,6 +56,7 @@ function makeNode() {
         return (index === -1) ? this.keyCount() : index;
       } 
     },
+    // insert item into node then sort
     insert: function (item) {
       this.keys.push(item); 
       this.keys.sort((a,b) => ((a<b) ? -1 : ((a>b) ? 1: 0)));
@@ -73,6 +74,8 @@ function insert(tree, item){
     if (!node.contains(item)) {
       node.insert(item);
       balance(tree, node);
+    } else {
+      console.log(`${item} already in tree`);
     }
   }
 };
@@ -84,39 +87,41 @@ function balance(tree, node) {
 }
 
 function split(tree, node) {
-  // leaf node is split ≈≈ left and right
+  // node is split in half: left and right
   let right = splitRight(node);
   let left = splitLeft(node);
-  // will push midKey to parent
+
+  // key to push into parent node 
   let midKey = left.keys.pop();
 
   let parent = left.parent;
-  // did we split the root? make new root node 
+  // did we split the root?
   if (parent === null) { 
     increaseTreeDepth(tree, left, right, midKey);
     parent = tree.root;
   } else {
+    // push midKey into parent node, update links
     let index = parent.keys.findIndex((e) => e > midKey);
     let pos = (index === -1) ? parent.keyCount() : index;
     parent.keys.splice(pos, 0, midKey);
     parent.child[pos] = left;
     parent.child.splice(pos+1, 0, right);
-    right.parent = left.parent;
+    right.parent = parent;
   }
   return parent;
 }
 function splitRight(node) {
-  let middle = Math.floor(node.keys.length/2);
-  // move right half into new node
+  let middle = Math.floor(node.keys.length/2) + 1;
   let newNode = makeNode();
-  newNode.keys = node.keys.slice(middle+1);
+  // move right half of node into the new node
+  newNode.keys = node.keys.slice(middle);
   if (!node.isLeaf) {
-    // deal with links
     newNode.isLeaf = false;
-    newNode.child[0] = node.child[middle+1];
-    newNode.child[0].parent = newNode; 
-    newNode.child[1] = node.child[middle+2];
-    newNode.child[1].parent = newNode; 
+    // node has children, add them to newNode 
+    newNode.child = node.child.slice(middle);
+    newNode.child.forEach((e) => {
+      e.parent = newNode;
+    })
   }
   return newNode;
 }
@@ -124,7 +129,7 @@ function splitLeft(node) {
   let middle = Math.floor(node.keys.length/2);
   node.keys.splice(middle+1);
   if (!node.isLeaf){
-    // deal with links
+    // node has children, remove right half
     node.child.splice(middle+1);
   } 
   return node;
@@ -133,29 +138,43 @@ function splitLeft(node) {
 function increaseTreeDepth(tree, left, right, key) {
   let newRoot = makeNode();
   newRoot.parent === null;
+  newRoot.isLeaf = false;
   tree.root = newRoot;
   newRoot.keys.push(key);
   newRoot.child[0] = left;
   newRoot.child[1] = right;
-  newRoot.isLeaf = false;
   // parent of the just split nodes ≈≈ new root
   left.parent = newRoot;
   right.parent = newRoot;
 }
+
 function traverse(tree) {
   
 }
 
-const atree = btree(3);
-insert(atree, 1);
-insert(atree, 2);
-insert(atree, 3);
-insert(atree, 4);
-insert(atree, 5);
-insert(atree, 6);
-insert(atree, 7);
-insert(atree, 8);
-insert(atree, 9);
+/*
+const atree = btree(5);
+insert(atree, 50); insert(atree, 80); 
 
+insert(atree, 10); insert(atree, 20);
+insert(atree, 23); insert(atree, 27);
+insert(atree, 4); insert(atree, 5); insert(atree, 6); 
+
+insert(atree, 14); insert(atree, 15); insert(atree, 16);
+
+insert(atree, 60); insert(atree, 70); insert(atree, 75); 
+insert(atree, 64); insert(atree, 65); 
+insert(tree, 68);
+      insert(tree, 77); 
+      insert(tree, 78); 
+      insert(tree, 79);
+      insert(tree, 72); insert(tree, 73); 
+      insert(tree, 51); insert(tree, 52); 
+      
+      insert(tree, 90); insert(tree, 95); 
+      insert(tree, 100);  insert(tree, 110); insert(tree, 110);
+      insert(tree, 92); insert(tree, 93);
+      insert(tree, 81); insert(tree, 82); insert(tree, 89);
+     */ 
 module.exports.btree = btree;
 module.exports.insert = insert;
