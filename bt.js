@@ -1,24 +1,14 @@
 'use strict';
 
 /*  
- *  JavaScript Implementation of a B tree
+ *  JavaScript Implementation of a B tree, multi-way tree
  *  m - order of tree ≈ max number of children
  *  
  * nodes are split with left-bias, 
- *  when nodes don't split evenly in two (after removing middle node)
- *  the left side will have one more key than the right side
+ *  - nodes that don't split evenly in two (after removing middle key)
+ *  - the left side will have one more key than the right side
  *
  * */
-
-/*
-  tree = btree(4)
-  tree.insert(3)
-  tree.order // returns order
-  tree.maxKeys // returns maxKeys
-  tree.traverse.array()
-  tree.traverse.string()
-  tree.traverse.log()
-*/
 
 function btree(m) {
   return {
@@ -157,30 +147,38 @@ function increaseTreeDepth(tree, left, right, key) {
   right.parent = newRoot;
 }
 
-inOrder.str = '';
-inOrder.a = [];
-function inOrder(node) {
-  if (node.isLeaf) {
-    // node.keys.forEach((k) => { inOrder.str += k + ',' } );
-    node.keys.forEach((k) => { inOrder.a.push(k) } );
-    return;
-  }
-  else {
-    // print left child then root
-    for(let i = 0; i < node.keyCount(); i++) {
-      inOrder(node.child[i])
-      // inOrder.str += node.keys[i] + ',';
-      inOrder.a.push(node.keys[i]);
+function traverse() {
+  let items = [];
+  let list = '';
+  return {
+    inOrder : function(node){
+      if (node.isLeaf) {
+        node.keys.forEach((k) => { items.push(k) } );
+        node.keys.forEach((k) => { list += k + ', ' } );
+        return;
+      }
+      else {
+        // print left child then root
+        for(let i = 0; i < node.keyCount(); i++) {
+          this.inOrder(node.child[i])
+          items.push(node.keys[i]);
+          list += node.keys[i] + ',';
+        }
+        // print last right child
+        this.inOrder(node.child[node.keyCount()]);
+      }
+      return this; 
+    }, 
+    toArray : function() {
+      return items;
+    },
+    toList : function() {
+      // remove trailing whitespace & comma
+      return list.trim().slice(0,-1);
     }
-    // print last right child
-    inOrder(node.child[node.keyCount()]);
   }
-  // return inOrder.str.slice(0,-1);
-  return inOrder.a;
-
 }
-
 
 module.exports.btree = btree;
 module.exports.insert = insert;
-module.exports.inOrder = inOrder;
+module.exports.traverse = traverse;
