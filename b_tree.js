@@ -11,20 +11,23 @@
  * */
 
 function btree(m) {
+  let order = m;
+  let maxKeys = m-1;
+  root = null;
   return {
-    root: null,
-    order: m,
-    maxKeys: m-1,
-    minChild: Math.ceil(m/2),
-    minKeys: Math.ceil(m/2)-1, isEmpty: function(){return (this.root === null)}, 
-    exists: function(item, node=this.root){ if (this.root === null) return false;
+    // root: null,
+    root: function() { return root; },
+    setRoot: function(newRoot) { root = newRoot; return this},
+    maxKeys: function() { return maxKeys; },
+    isEmpty: function(){return (root === null)},
+    exists: function(item, node = root){ if (root === null) return false;
       if (node.contains(item)) return true;
       if (node.isLeaf) return false; 
       return (this.exists(item, node.child[node.subTree(item)]));
     },
     
     find: function(item, node){
-      if (this.root === null) return false;
+      if (root === null) return false;
       // return node that contains item or 
       //   the leaf node where item will be inserted
       if ((node.isLeaf) || (node.contains(item))) {
@@ -64,12 +67,15 @@ function makeNode() {
 }
 
 function insert(tree, item){
-  if(tree.root === null) {
-    tree.root = makeNode();
-    tree.root.keys.push(item);
+  if(tree.root() === null) {
+    // tree.root = makeNode();
+    tree.setRoot(makeNode());
+    // tree.root.keys.push(item);
+    tree.root().keys.push(item);
   } else {
     // get leaf to insert item into, unless already in tree
-    let node = tree.find(item, tree.root);  
+    // let node = tree.find(item, tree.root);  
+    let node = tree.find(item, tree.root());  
     if (!node.contains(item)) {
       node.insert(item);
       balance(tree, node);
@@ -80,7 +86,7 @@ function insert(tree, item){
 };
 
 function balance(tree, node) {
-  if (node.keyCount() > tree.maxKeys) {
+  if (node.keyCount() > tree.maxKeys()) {
     balance(tree, split(tree, node));
   } 
 }
@@ -97,7 +103,8 @@ function split(tree, node) {
   // did we split the root?
   if (parent === null) { 
     increaseTreeDepth(tree, left, right, midKey);
-    parent = tree.root;
+    // parent = tree.root;
+    parent = tree.root();
   } else {
     // push midKey into parent node, update links
     let index = parent.keys.findIndex((e) => e > midKey);
@@ -138,7 +145,8 @@ function increaseTreeDepth(tree, left, right, key) {
   let newRoot = makeNode();
   newRoot.parent === null;
   newRoot.isLeaf = false;
-  tree.root = newRoot;
+  // tree.root = newRoot;
+  tree.setRoot(newRoot);
   newRoot.keys.push(key);
   newRoot.child[0] = left;
   newRoot.child[1] = right;
@@ -155,7 +163,7 @@ function traverse() {
       if (node.isLeaf) {
         node.keys.forEach((k) => { items.push(k) } );
         node.keys.forEach((k) => { list += k + ', ' } );
-        return;
+        return this;
       }
       else {
         // print left child then root
@@ -178,6 +186,10 @@ function traverse() {
     }
   }
 }
+
+
+
+
 
 module.exports.btree = btree;
 module.exports.insert = insert;
