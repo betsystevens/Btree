@@ -10,6 +10,15 @@
  *
  * */
 
+/*
+  tree = btree(4)
+  tree.insert(3)
+  tree.order // returns order
+  tree.maxKeys // returns maxKeys
+  tree.traverse.array()
+  tree.traverse.string()
+  tree.traverse.log()
+*/
 
 function btree(m) {
   return {
@@ -17,14 +26,13 @@ function btree(m) {
     order: m,
     maxKeys: m-1,
     minChild: Math.ceil(m/2),
-    minKeys: Math.ceil(m/2)-1,
-    isEmpty: function(){return (this.root === null)},
-    exists: function(item, node=this.root) {
-      if (this.root === null) return false;
+    minKeys: Math.ceil(m/2)-1, isEmpty: function(){return (this.root === null)}, 
+    exists: function(item, node=this.root){ if (this.root === null) return false;
       if (node.contains(item)) return true;
       if (node.isLeaf) return false; 
       return (this.exists(item, node.child[node.subTree(item)]));
     },
+    
     find: function(item, node){
       if (this.root === null) return false;
       // return node that contains item or 
@@ -38,6 +46,7 @@ function btree(m) {
     }
   }
 }
+
 
 function makeNode() {
   return {
@@ -148,33 +157,30 @@ function increaseTreeDepth(tree, left, right, key) {
   right.parent = newRoot;
 }
 
-function traverse(tree) {
-  
+inOrder.str = '';
+inOrder.a = [];
+function inOrder(node) {
+  if (node.isLeaf) {
+    // node.keys.forEach((k) => { inOrder.str += k + ',' } );
+    node.keys.forEach((k) => { inOrder.a.push(k) } );
+    return;
+  }
+  else {
+    // print left child then root
+    for(let i = 0; i < node.keyCount(); i++) {
+      inOrder(node.child[i])
+      // inOrder.str += node.keys[i] + ',';
+      inOrder.a.push(node.keys[i]);
+    }
+    // print last right child
+    inOrder(node.child[node.keyCount()]);
+  }
+  // return inOrder.str.slice(0,-1);
+  return inOrder.a;
+
 }
 
-/*
-const atree = btree(5);
-insert(atree, 50); insert(atree, 80); 
 
-insert(atree, 10); insert(atree, 20);
-insert(atree, 23); insert(atree, 27);
-insert(atree, 4); insert(atree, 5); insert(atree, 6); 
-
-insert(atree, 14); insert(atree, 15); insert(atree, 16);
-
-insert(atree, 60); insert(atree, 70); insert(atree, 75); 
-insert(atree, 64); insert(atree, 65); 
-insert(tree, 68);
-      insert(tree, 77); 
-      insert(tree, 78); 
-      insert(tree, 79);
-      insert(tree, 72); insert(tree, 73); 
-      insert(tree, 51); insert(tree, 52); 
-      
-      insert(tree, 90); insert(tree, 95); 
-      insert(tree, 100);  insert(tree, 110); insert(tree, 110);
-      insert(tree, 92); insert(tree, 93);
-      insert(tree, 81); insert(tree, 82); insert(tree, 89);
-     */ 
 module.exports.btree = btree;
 module.exports.insert = insert;
+module.exports.inOrder = inOrder;
