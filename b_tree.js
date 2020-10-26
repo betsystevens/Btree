@@ -14,17 +14,27 @@ function btree(order) {
   let maxKeys = order-1;
   root = null;
   return {
-    root: function() { return root; },
-    setRoot: function(newRoot) { root = newRoot; return this},
-    maxKeys: function() { return maxKeys; },
-    isEmpty: function(){return (root === null)},
-    exists: function(item, node = root){ if (root === null) return false;
+
+    root() { 
+      return root; 
+    },
+    setRoot(newRoot) {
+       root = newRoot; return this
+    },
+    maxKeys() {
+       return maxKeys; 
+    },
+    isEmpty(){
+      return (root === null)
+    },
+    exists(item, node = root){
+      if (root === null) return false;
       if (node.contains(item)) return true;
       if (node.isLeaf) return false; 
       return (this.exists(item, node.child[node.subTree(item)]));
     },
     
-    find: function(item, node){
+    find(item, node){
       if (root === null) return false;
       // return node that contains item or 
       //   the leaf node where item will be inserted
@@ -36,13 +46,14 @@ function btree(order) {
       }
     },
 
-    balance: function (node) {
+    balance (node) {
       if (node.keyCount() > this.maxKeys()) {
         this.balance(split(this, node));
       } 
     },
 
-    increaseHeight: function (left, right, key) {
+    // increaseHeight: function (left, right, key) {
+    increaseHeight(left, right, key) {
       let newRoot = makeNode();
       newRoot.parent === null;
       newRoot.isLeaf = false;
@@ -65,18 +76,18 @@ function makeNode() {
     keys: [],   // max: m-1
     child: [],  // max: m
 
-    keyCount: function() { 
+    keyCount() { 
       return this.keys.length; 
     },
-    midPoint: function() {
+    midPoint() {
       return Math.floor(this.keys.length/2);
     },
-    contains: function(item) { 
+    contains(item) { 
       return (this.keys.includes(item))
     },
 
     // returns index of child[] ≈≈ the subTree to search for item
-    subTree: function(item){
+    subTree(item){
       if(item < this.keys[0]) {
          return 0;
       } else {
@@ -86,7 +97,7 @@ function makeNode() {
     },
     
     // insert item into leaf node, then sort
-    leafInsert: function (item) {
+    leafInsert(item) {
       this.keys.push(item); 
       this.keys.sort((a,b) => ((a<b) ? -1 : ((a>b) ? 1: 0)));
     },
