@@ -46,13 +46,76 @@ function btree(order) {
       }
     },
 
+    insert(item){
+      if(this.root() === null) {
+        this.setRoot(makeNode());
+        this.root().keys.push(item);
+      } else {
+        // get leaf to insert item into, unless already in tree
+        let node = this.find(item, this.root());  
+        if (!node.contains(item)) {
+          node.leafInsert(item);
+          // balance(tree, node);
+          this.balance(node);
+        } else {
+          console.log(`${item} already in tree`);
+        }
+      }
+    },
+
+    insertPoint(node, key) {
+      let index = node.keys.findIndex((e) => e > key);
+      let pos = (index === -1) ? node.keyCount() : index;
+      return pos;
+    },
+
+    merge(key, parent, left, right) {
+      let pos = this.insertPoint(parent, key);
+      parent.keys.splice(pos, 0, key);
+      parent.child[pos] = left;
+      parent.child.splice(pos+1, 0, right);
+      right.parent = parent;
+      return parent;
+    },
+
+    split(node) {
+      let [left, midKey, right] = this.separate(node);
+
+      let parent = left.parent;
+      // did we split the root?
+      if (parent === null) { 
+        parent = this.increaseHeight(left, right, midKey);
+      } else {
+        // push midKey into parent node, update links
+        parent = this.merge(midKey, parent, left, right);
+      }
+      return parent;
+    },
+
+    separate(node) {
+      // newNode will hold right half of node 
+      let middle = node.midPoint();
+      let newNode = makeNode();
+      newNode.keys = node.keys.splice(middle+1);
+      let midKey = node.keys.pop()
+
+      if (!node.isLeaf) {
+        newNode.isLeaf = false;
+        newNode.child = node.child.splice(middle + 1);
+        newNode.child.forEach((e) => {
+          e.parent = newNode;
+        })
+      }
+      return [node, midKey, newNode];
+    },
+
     balance (node) {
       if (node.keyCount() > this.maxKeys()) {
-        this.balance(split(this, node));
+        // this.balance(this.split(this, node));
+        this.balance(this.split(node));
       } 
     },
 
-    // increaseHeight: function (left, right, key) {
     increaseHeight(left, right, key) {
       let newRoot = makeNode();
       newRoot.parent === null;
@@ -104,69 +167,6 @@ function makeNode() {
   }
 }
 
-function insert(tree, item){
-  if(tree.root() === null) {
-    tree.setRoot(makeNode());
-    tree.root().keys.push(item);
-  } else {
-    // get leaf to insert item into, unless already in tree
-    let node = tree.find(item, tree.root());  
-    if (!node.contains(item)) {
-      node.leafInsert(item);
-      // balance(tree, node);
-      tree.balance(node);
-    } else {
-      console.log(`${item} already in tree`);
-    }
-  }
-};
-
-function insertPoint(node, key) {
-  let index = node.keys.findIndex((e) => e > key);
-  let pos = (index === -1) ? node.keyCount() : index;
-  return pos;
-}
-
-function push(key, parent, left, right) {
-  let pos = insertPoint(parent, key);
-  parent.keys.splice(pos, 0, key);
-  parent.child[pos] = left;
-  parent.child.splice(pos+1, 0, right);
-  right.parent = parent;
-  return parent;
-}
-
-function split(tree, node) {
-  let [left, midKey, right] = separate(node);
-
-  let parent = left.parent;
-  // did we split the root?
-  if (parent === null) { 
-    parent = tree.increaseHeight(left, right, midKey);
-  } else {
-    // push midKey into parent node, update links
-    parent = push(midKey, parent, left, right);
-  }
-  return parent;
-}
-
-function separate(node) {
-  // newNode will hold right half of node 
-  let middle = node.midPoint();
-  let newNode = makeNode();
-  newNode.keys = node.keys.splice(middle+1);
-  let midKey = node.keys.pop()
-
-  if (!node.isLeaf) {
-    newNode.isLeaf = false;
-    newNode.child = node.child.splice(middle + 1);
-    newNode.child.forEach((e) => {
-      e.parent = newNode;
-    })
-  }
-  return [node, midKey, newNode];
-}
-
 function traverse() {
   let items = [];
   let list = '';
@@ -200,5 +200,5 @@ function traverse() {
 }
 
 module.exports.btree = btree;
-module.exports.insert = insert;
+// module.exports.insert = insert;
 module.exports.traverse = traverse;
