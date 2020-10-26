@@ -3,7 +3,7 @@
 /*  
  *  JavaScript Implementation of a B tree, multi-way tree
  *  m - order of tree ≈ max number of children
- *  
+ * 
  * nodes are split with left-bias, 
  *  - nodes that don't split evenly in two (after removing middle key)
  *  - the left side will have one more key than the right side
@@ -15,7 +15,6 @@ function btree(m) {
   let maxKeys = m-1;
   root = null;
   return {
-    // root: null,
     root: function() { return root; },
     setRoot: function(newRoot) { root = newRoot; return this},
     maxKeys: function() { return maxKeys; },
@@ -36,10 +35,14 @@ function btree(m) {
         let pos = node.subTree(item);
         return this.find(item, node.child[pos]);
       }
+    },
+    balance: function (node) {
+      if (node.keyCount() > this.maxKeys()) {
+        this.balance(split(this, node));
+      } 
     }
   }
 }
-
 
 function makeNode() {
   return {
@@ -48,6 +51,9 @@ function makeNode() {
     keys: [],    // max: m-1
     child: [],   // max: m
     keyCount: function() { return this.keys.length; } ,
+    midPoint: function() {
+      // console.log(this.keys.length)
+      return Math.floor(this.keys.length/2) },
     contains: function(item) { return (this.keys.includes(item))},
     // returns index of child[] ≈≈ the subTree to search for item
     subTree: function(item){
@@ -59,26 +65,25 @@ function makeNode() {
       } 
     },
     // insert item into node then sort
-    insert: function (item) {
+    leafInsert: function (item) {
       this.keys.push(item); 
       this.keys.sort((a,b) => ((a<b) ? -1 : ((a>b) ? 1: 0)));
-    }
-  } 
+    },
+
+  }
 }
 
 function insert(tree, item){
   if(tree.root() === null) {
-    // tree.root = makeNode();
     tree.setRoot(makeNode());
-    // tree.root.keys.push(item);
     tree.root().keys.push(item);
   } else {
     // get leaf to insert item into, unless already in tree
-    // let node = tree.find(item, tree.root);  
     let node = tree.find(item, tree.root());  
     if (!node.contains(item)) {
-      node.insert(item);
-      balance(tree, node);
+      node.leafInsert(item);
+      // balance(tree, node);
+      tree.balance(node);
     } else {
       console.log(`${item} already in tree`);
     }
@@ -92,18 +97,12 @@ function balance(tree, node) {
 }
 
 function split(tree, node) {
-  // node is split in half: left and right
-  let right = splitRight(node);
-  let left = splitLeft(node);
-
-  // key to push into parent node 
-  let midKey = left.keys.pop();
+  let [left, midKey, right] = separate(node);
 
   let parent = left.parent;
   // did we split the root?
   if (parent === null) { 
     increaseTreeDepth(tree, left, right, midKey);
-    // parent = tree.root;
     parent = tree.root();
   } else {
     // push midKey into parent node, update links
@@ -116,36 +115,29 @@ function split(tree, node) {
   }
   return parent;
 }
-function splitRight(node) {
-  let middle = Math.floor(node.keys.length/2) + 1;
+
+function separate(node) {
+  // newNode will hold right half of node 
+  let middle = node.midPoint();
   let newNode = makeNode();
-  // move right half of node into the new node
-  newNode.keys = node.keys.slice(middle);
+  newNode.keys = node.keys.splice(middle+1);
+  let midKey = node.keys.pop()
+
   if (!node.isLeaf) {
     newNode.isLeaf = false;
-    // node has children, add them to newNode 
-    newNode.child = node.child.slice(middle);
+    newNode.child = node.child.splice(middle + 1);
     newNode.child.forEach((e) => {
       e.parent = newNode;
     })
   }
-  return newNode;
-}
-function splitLeft(node) {
-  let middle = Math.floor(node.keys.length/2);
-  node.keys.splice(middle+1);
-  if (!node.isLeaf){
-    // node has children, remove right half
-    node.child.splice(middle+1);
-  } 
-  return node;
+  let parts = [node, midKey, newNode];
+  return parts;
 }
 
 function increaseTreeDepth(tree, left, right, key) {
   let newRoot = makeNode();
   newRoot.parent === null;
   newRoot.isLeaf = false;
-  // tree.root = newRoot;
   tree.setRoot(newRoot);
   newRoot.keys.push(key);
   newRoot.child[0] = left;
@@ -186,10 +178,11 @@ function traverse() {
     }
   }
 }
-
-
-
-
+// const order = 4;
+const tree = btree(3);
+      insert(tree, 2);
+      insert(tree, 3);
+      insert(tree, 1);
 
 module.exports.btree = btree;
 module.exports.insert = insert;
