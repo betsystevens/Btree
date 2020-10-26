@@ -10,9 +10,8 @@
  *
  * */
 
-function btree(m) {
-  let order = m;
-  let maxKeys = m-1;
+function btree(order) {
+  let maxKeys = order-1;
   root = null;
   return {
     root: function() { return root; },
