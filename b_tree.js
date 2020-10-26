@@ -35,9 +35,9 @@ function btree(order) {
     },
     
     find(item, node){
-      if (root === null) return false;
       // return node that contains item or 
       //   the leaf node where item will be inserted
+      if (root === null) return false;
       if ((node.isLeaf) || (node.contains(item))) {
         return node;
       } else {
@@ -47,6 +47,7 @@ function btree(order) {
     },
 
     insert(item){
+      // insert item into tree
       if(this.root() === null) {
         this.setRoot(makeNode());
         this.root().keys.push(item);
@@ -59,8 +60,10 @@ function btree(order) {
           this.balance(node);
         } else {
           console.log(`${item} already in tree`);
+          return false;
         }
       }
+      return true;
     },
 
     insertPoint(node, key) {
@@ -79,7 +82,7 @@ function btree(order) {
     },
 
     split(node) {
-      let [left, midKey, right] = this.separate(node);
+      let [left, midKey, right] = this.getParts(node);
 
       let parent = left.parent;
       // did we split the root?
@@ -92,7 +95,7 @@ function btree(order) {
       return parent;
     },
 
-    separate(node) {
+    getParts(node) {
       // newNode will hold right half of node 
       let middle = node.midPoint();
       let newNode = makeNode();
@@ -199,5 +202,4 @@ function traverse() {
 }
 
 module.exports.btree = btree;
-// module.exports.insert = insert;
 module.exports.traverse = traverse;
