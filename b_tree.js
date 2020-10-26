@@ -36,10 +36,25 @@ function btree(m) {
         return this.find(item, node.child[pos]);
       }
     },
+
     balance: function (node) {
       if (node.keyCount() > this.maxKeys()) {
         this.balance(split(this, node));
       } 
+    },
+
+    increaseHeight: function (left, right, key) {
+      let newRoot = makeNode();
+      newRoot.parent === null;
+      newRoot.isLeaf = false;
+      this.setRoot(newRoot);
+      newRoot.keys.push(key);
+      newRoot.child[0] = left;
+      newRoot.child[1] = right;
+      // parent of the just split nodes ≈≈ new root
+      left.parent = newRoot;
+      right.parent = newRoot;
+      return newRoot;
     }
   }
 }
@@ -117,8 +132,7 @@ function split(tree, node) {
   let parent = left.parent;
   // did we split the root?
   if (parent === null) { 
-    increaseTreeDepth(tree, left, right, midKey);
-    parent = tree.root();
+    parent = tree.increaseHeight(left, right, midKey);
   } else {
     // push midKey into parent node, update links
     parent = push(midKey, parent, left, right);
@@ -141,19 +155,6 @@ function separate(node) {
     })
   }
   return [node, midKey, newNode];
-}
-
-function increaseTreeDepth(tree, left, right, key) {
-  let newRoot = makeNode();
-  newRoot.parent === null;
-  newRoot.isLeaf = false;
-  tree.setRoot(newRoot);
-  newRoot.keys.push(key);
-  newRoot.child[0] = left;
-  newRoot.child[1] = right;
-  // parent of the just split nodes ≈≈ new root
-  left.parent = newRoot;
-  right.parent = newRoot;
 }
 
 function traverse() {
