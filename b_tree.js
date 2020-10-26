@@ -12,7 +12,7 @@
 
 function btree(order) {
   let maxKeys = order-1;
-  root = null;
+  let root = null;
   return {
 
     root() { 
@@ -130,6 +130,40 @@ function btree(order) {
       left.parent = newRoot;
       right.parent = newRoot;
       return newRoot;
+    },
+
+    // tree.traverse().inOrder().toArray();
+    traverse() {
+      let items = [];
+      let list = '';
+      let root = this.root();
+      return {
+        inOrder : function(node = root){
+          if (node.isLeaf) {
+            node.keys.forEach((k) => { items.push(k) } );
+            node.keys.forEach((k) => { list += k + ', ' } );
+            return this;
+          }
+          else {
+            // visit left child, then root, then recurse
+            for(let i = 0; i < node.keyCount(); i++) {
+              this.inOrder(node.child[i])
+              items.push(node.keys[i]);
+              list += node.keys[i] + ',';
+            }
+            // print last right child
+            this.inOrder(node.child[node.keyCount()]);
+          }
+          return this; 
+        }, 
+        toArray : function() {
+          return items;
+        },
+        toList : function() {
+          // remove trailing whitespace & comma
+          return list.trim().slice(0,-1);
+        }
+      }
     }
   }
 }
@@ -169,37 +203,20 @@ function makeNode() {
   }
 }
 
-function traverse() {
-  let items = [];
-  let list = '';
-  return {
-    inOrder : function(node){
-      if (node.isLeaf) {
-        node.keys.forEach((k) => { items.push(k) } );
-        node.keys.forEach((k) => { list += k + ', ' } );
-        return this;
-      }
-      else {
-        // visit left child, then root, then recurse
-        for(let i = 0; i < node.keyCount(); i++) {
-          this.inOrder(node.child[i])
-          items.push(node.keys[i]);
-          list += node.keys[i] + ',';
-        }
-        // print last right child
-        this.inOrder(node.child[node.keyCount()]);
-      }
-      return this; 
-    }, 
-    toArray : function() {
-      return items;
-    },
-    toList : function() {
-      // remove trailing whitespace & comma
-      return list.trim().slice(0,-1);
-    }
-  }
-}
+// sample test
+let tree = btree();
+
+var a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20];
+var a2 = [100,90,80,70,60,50,40,30,20,10,15,25,35,45,55,65,75,85,95];
+var a3 = [4,2,7,1,5,3,8];
+
+var a = a2;
+
+a.forEach((e) => {
+    tree.insert(e);
+    console.log(tree.traverse().inOrder().toList());
+});
+console.log(tree.traverse().inOrder().toArray());
+
 
 module.exports.btree = btree;
-module.exports.traverse = traverse;
