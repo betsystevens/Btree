@@ -86,7 +86,7 @@ function btree(order) {
       if (parent === null) { 
         parent = this.increaseHeight(left, right, midKey);
       } else {
-        // push midKey into parent node, update links
+        // merge midKey into parent node, update links
         parent = this.merge(midKey, parent, left, right);
       }
       return parent;
@@ -111,7 +111,6 @@ function btree(order) {
 
     balance (node) {
       if (node.keyCount() > this.maxKeys()) {
-        // this.balance(this.split(this, node));
         this.balance(this.split(node));
       } 
     },
